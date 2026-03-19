@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoTrack Pro | Advanced Market Analytics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0B1120; }
+        
+        .glass { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
+        .skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none; margin: 0;
+        }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        select {
+            appearance: none; -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.2em;
+        }
+        select option { background-color: #0f172a; color: #e2e8f0; }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen pb-20">
+
+    <nav class="sticky top-0 z-50 glass px-6 py-4 mb-8 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                    <i data-lucide="zap" class="text-white w-6 h-6"></i>
+                </div>
+                <span class="text-xl font-bold tracking-tight">CryptoTrack <span class="text-blue-500">Pro</span></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-700">
+                    <button onclick="setCurrency('USD')" id="btn-usd" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-md">USD</button>
+                    <button onclick="setCurrency('THB')" id="btn-thb" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">THB</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="glass p-6 rounded-3xl flex items-center justify-between hover:border-slate-600 transition-colors">
+                <div>
+                    <h4 class="text-slate-400 text-xs uppercase font-bold tracking-widest mb-1">Market Sentiment</h4>
+                    <div id="fng-value" class="text-3xl font-bold text-slate-300">--</div>
+                    <p id="fng-label" class="text-xs text-slate-500 mt-1">Loading...</p>
+                </div>
+                <div class="w-16 h-16 rounded-full border-4 border-slate-700 flex items-center justify-center relative bg-slate-800/50">
+                    <i data-lucide="gauge" class="text-slate-400 w-8 h-8"></i>
+                </div>
+            </div>
+
+            <div class="glass p-6 rounded-3xl lg:col-span-2 flex flex-col md:flex-row items-center gap-6 hover:border-slate-600 transition-colors">
+                <div class="flex-1 w-full">
+                    <h4 class="text-slate-400 text-xs uppercase font-bold tracking-widest mb-3">Price Alert (BTC)</h4>
+                    <div class="flex gap-3">
+                        <input type="number" id="alert-price" placeholder="ตั้งราคาเป้าหมาย (USD)" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm w-full outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-500">
+                        <button onclick="enableNotification()" class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-xl text-sm font-bold transition-all whitespace-nowrap shadow-lg shadow-blue-500/20">Set Alert</button>
+                    </div>
+                </div>
+                <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 md:max-w-[180px]">
+                    <p id="alert-status" class="text-[10px] text-slate-400 leading-relaxed">
+                        <i data-lucide="bell-ring" class="w-3 h-3 inline mr-1 text-blue-400"></i>
+                        ระบบจะแจ้งเตือนเมื่อราคา Bitcoin ทะลุเป้าหมาย
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+            <div class="xl:col-span-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="main-container">
+                    <div class="skeleton h-[280px] rounded-3xl"></div>
+                    <div class="skeleton h-[280px] rounded-3xl"></div>
+                    <div class="skeleton h-[280px] rounded-3xl"></div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="glass p-6 rounded-3xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 transition-all duration-500 group-hover:bg-blue-500/20"></div>
+                    
+                    <h3 class="font-bold mb-5 flex items-center gap-3 text-slate-200">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                            <i data-lucide="calculator" class="w-4 h-4 text-blue-400"></i>
+                        </div>
+                        เครื่องคำนวณกำไร/ขาดทุน
+                    </h3>
+                    
+                    <div class="space-y-4 relative z-10">
+                        <div class="relative">
+                            <select id="roi-coin" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-4 pr-10 py-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-200 transition-all shadow-inner hover:border-slate-600 cursor-pointer">
+                                <option value="">-- กำลังโหลดข้อมูลเหรียญ --</option>
+                            </select>
+                        </div>
+
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <i data-lucide="coins" class="w-4 h-4 text-slate-500"></i>
+                            </div>
+                            <input type="number" id="roi-amount" placeholder="จำนวนเหรียญที่คุณมี" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-slate-200 placeholder-slate-500 shadow-inner hover:border-slate-600">
+                        </div>
+
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <i data-lucide="tag" class="w-4 h-4 text-slate-500"></i>
+                            </div>
+                            <input type="number" id="roi-buy" placeholder="ราคาต้นทุนต่อเหรียญ" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-slate-200 placeholder-slate-500 shadow-inner hover:border-slate-600">
+                        </div>
+                        
+                        <div class="mt-6 text-center bg-slate-900/40 rounded-2xl p-4 border border-slate-800/50 backdrop-blur-sm">
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-1">คาดการณ์กำไร / ขาดทุน</p>
+                            <h2 id="roi-result" class="text-3xl font-bold text-slate-500 font-mono drop-shadow-md transition-colors">$ 0.00</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass p-6 rounded-3xl">
+                    <h3 class="font-bold mb-5 text-sm flex items-center gap-2 text-slate-200">
+                        <i data-lucide="bar-chart-2" class="w-5 h-5 text-purple-400"></i> Market 24h Stats
+                    </h3>
+                    <div id="market-stats" class="space-y-3">
+                        <div class="text-xs text-center text-slate-500 py-4">กำลังประมวลผล...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[100] transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
+        <div class="glass bg-slate-800/90 text-slate-200 px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3">
+            <i id="toast-icon" data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+            <span id="toast-message" class="text-sm font-semibold"></span>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // โหลดค่าสกุลเงินจาก Local Storage (ถ้าไม่มีให้เป็น USD)
+        let currency = localStorage.getItem('crypto_currency') || 'USD';
+        let exRate = 36.5; 
+        let cryptoData = [];
+        let charts = {};
+        let targetPrice = null;
+        let isFirstLoad = true;
+
+        // ฟังก์ชันสร้างแจ้งเตือนแบบสวยงาม (Toast)
+        let toastTimeout;
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.innerText = message;
+            
+            if (type === 'error') {
+                iconEl.setAttribute('data-lucide', 'alert-circle');
+                iconEl.className = 'w-5 h-5 text-rose-500';
+            } else {
+                iconEl.setAttribute('data-lucide', 'check-circle');
+                iconEl.className = 'w-5 h-5 text-emerald-400';
+            }
+            lucide.createIcons();
+
+            // แสดง Toast
+            container.classList.remove('translate-y-20', 'opacity-0');
+            
+            // ซ่อน Toast หลังจาก 3 วินาที
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                container.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function enableNotification() {
+            if (Notification.permission !== 'granted') {
+                Notification.requestPermission().then(permission => {
+                    if(permission === 'granted') setAlert();
+                    else showToast("กรุณาอนุญาตการแจ้งเตือนในเบราว์เซอร์", "error");
+                });
+            } else {
+                setAlert();
+            }
+        }
+
+        function setAlert() {
+            const inputVal = parseFloat(document.getElementById('alert-price').value);
+            if(isNaN(inputVal) || inputVal <= 0) {
+                showToast("กรุณาระบุราคาที่ถูกต้องด้วยครับ", "error");
+                return;
+            }
+            targetPrice = inputVal;
+            document.getElementById('alert-status').innerHTML = `<i data-lucide="check-circle" class="w-3 h-3 inline mr-1 text-emerald-400"></i> แจ้งเตือนเมื่อ BTC แตะ $${targetPrice.toLocaleString()}`;
+            lucide.createIcons();
+            
+            // เรียกใช้ Toast แทน alert() แข็งๆ
+            showToast(`ตั้งค่าการแจ้งเตือนที่ $${targetPrice.toLocaleString()} เรียบร้อย!`);
+            document.getElementById('alert-price').value = ''; // เคลียร์ช่องพิมพ์ให้ดูคลีนๆ
+        }
+
+        function checkAlert(currentBtcPrice) {
+            if (targetPrice && currentBtcPrice >= targetPrice) {
+                new Notification("🚀 CryptoTrack Price Alert!", {
+                    body: `Bitcoin ทะลุเป้าหมายของคุณแล้ว: $${currentBtcPrice.toLocaleString()}`,
+                    icon: "https://cryptologos.cc/logos/bitcoin-btc-logo.png"
+                });
+                targetPrice = null; 
+                document.getElementById('alert-status').innerHTML = `<i data-lucide="bell-ring" class="w-3 h-3 inline mr-1 text-blue-400"></i> ระบบจะแจ้งเตือนเมื่อราคา Bitcoin ทะลุเป้าหมาย`;
+                lucide.createIcons();
+            }
+        }
+
+        async function fetchFnG() {
+            try {
+                const res = await fetch('https://api.alternative.me/fng/');
+                const json = await res.json();
+                const val = json.data[0].value;
+                const label = json.data[0].value_classification;
+                
+                const el = document.getElementById('fng-value');
+                el.innerText = val;
+                document.getElementById('fng-label').innerText = label;
+                
+                if(val >= 60) el.className = "text-3xl font-bold text-emerald-400";
+                else if(val <= 40) el.className = "text-3xl font-bold text-rose-500";
+                else el.className = "text-3xl font-bold text-yellow-400";
+            } catch (e) {
+                console.error("FnG Error:", e);
+            }
+        }
+
+        async function fetchData() {
+            try {
+                const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,binancecoin,solana,cardano,ripple&sparkline=true&price_change_percentage=24h');
+                if(!res.ok) throw new Error("API Rate Limit");
+                
+                cryptoData = await res.json();
+                
+                renderCards();
+                renderMarketStats(); 
+                
+                if(isFirstLoad) {
+                    populateROICoins(); 
+                    // ตั้งค่าปุ่มสกุลเงินตอนโหลดครั้งแรก
+                    setCurrency(currency);
+                    isFirstLoad = false;
+                }
+                
+                updateROI();
+                
+                const btc = cryptoData.find(c => c.id === 'bitcoin');
+                if(btc) checkAlert(btc.current_price);
+
+            } catch (e) { 
+                console.error("Data Fetch Error:", e);
+            }
+        }
+
+        function setCurrency(c) {
+            currency = c;
+            // บันทึกค่าลง Local Storage ให้จำไว้ใช้คราวหน้า
+            localStorage.setItem('crypto_currency', c);
+            
+            document.getElementById('btn-usd').className = c === 'USD' ? 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-md' : 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
+            document.getElementById('btn-thb').className = c === 'THB' ? 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-md' : 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white';
+            
+            if (!isFirstLoad) {
+                renderCards();
+                updateROI();
+            }
+        }
+
+        function formatVal(val) {
+            if (currency === 'THB') return '฿' + (val * exRate).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2});
+            return '$' + val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
+        }
+
+        function renderCards() {
+            const container = document.getElementById('main-container');
+            
+            container.innerHTML = cryptoData.map(coin => {
+                const change = coin.price_change_percentage_24h || 0;
+                const isUp = change >= 0;
+                return `
+                    <div class="glass p-6 rounded-3xl hover:border-blue-500/30 transition-all duration-300 group">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <img src="${coin.image}" class="w-8 h-8 rounded-full shadow-lg">
+                                <div>
+                                    <h3 class="text-slate-200 text-sm font-bold tracking-wide">${coin.name}</h3>
+                                    <p class="text-[10px] text-slate-500 uppercase">${coin.symbol}</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold ${isUp ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10'} px-2 py-1 rounded-md">
+                                ${isUp ? '+' : ''}${change.toFixed(2)}%
+                            </span>
+                        </div>
+                        <div class="text-2xl font-bold font-mono text-slate-100 tracking-tight">${formatVal(coin.current_price)}</div>
+                        <div class="h-[70px] mt-4 w-full">
+                            <canvas id="chart-${coin.id}"></canvas>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            cryptoData.forEach(coin => {
+                const ctx = document.getElementById(`chart-${coin.id}`).getContext('2d');
+                const isUp = (coin.price_change_percentage_24h || 0) >= 0;
+                const lineColor = isUp ? '#10b981' : '#f43f5e';
+                const bgColor = isUp ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)';
+
+                if (charts[coin.id]) charts[coin.id].destroy(); 
+                
+                charts[coin.id] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: coin.sparkline_in_7d.price.map((_, i) => i),
+                        datasets: [{
+                            data: coin.sparkline_in_7d.price,
+                            borderColor: lineColor,
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            fill: true,
+                            backgroundColor: bgColor,
+                            tension: 0.3
+                        }]
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { legend: { display: false }, tooltip: { enabled: false } }, 
+                        scales: { x: { display: false }, y: { display: false } },
+                        layout: { padding: 0 }
+                    }
+                });
+            });
+        }
+
+        function renderMarketStats() {
+            if(cryptoData.length === 0) return;
+            const container = document.getElementById('market-stats');
+            
+            const sorted = [...cryptoData].sort((a, b) => (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0));
+            const gainer = sorted[0];
+            const loser = sorted[sorted.length - 1];
+
+            container.innerHTML = `
+                <div class="flex justify-between items-center p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                            <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-slate-500 uppercase">Top Gainer</p>
+                            <p class="font-bold text-sm text-slate-200">${gainer.symbol.toUpperCase()}</p>
+                        </div>
+                    </div>
+                    <p class="text-emerald-400 text-sm font-bold">+${gainer.price_change_percentage_24h.toFixed(2)}%</p>
+                </div>
+
+                <div class="flex justify-between items-center p-3 bg-slate-900/60 rounded-xl border border-slate-800 mt-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-rose-500/10 flex items-center justify-center">
+                            <i data-lucide="trending-down" class="w-4 h-4 text-rose-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-slate-500 uppercase">Top Loser</p>
+                            <p class="font-bold text-sm text-slate-200">${loser.symbol.toUpperCase()}</p>
+                        </div>
+                    </div>
+                    <p class="text-rose-400 text-sm font-bold">${loser.price_change_percentage_24h.toFixed(2)}%</p>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function populateROICoins() {
+            const select = document.getElementById('roi-coin');
+            select.innerHTML = cryptoData.map(c => `<option value="${c.id}">${c.name} (${c.symbol.toUpperCase()})</option>`).join('');
+        }
+
+        function updateROI() {
+            const coinId = document.getElementById('roi-coin').value;
+            const amt = parseFloat(document.getElementById('roi-amount').value) || 0;
+            const buy = parseFloat(document.getElementById('roi-buy').value) || 0;
+            const resultDisplay = document.getElementById('roi-result');
+
+            if(!coinId || cryptoData.length === 0) return;
+            
+            const selectedCoin = cryptoData.find(c => c.id === coinId);
+            
+            if (selectedCoin && amt > 0 && buy > 0) {
+                let currentPrice = selectedCoin.current_price;
+                let profitUSD = (currentPrice - buy) * amt;
+                let displayVal = profitUSD;
+                
+                if(currency === 'THB') {
+                    displayVal = profitUSD * exRate;
+                }
+
+                const sign = profitUSD >= 0 ? '+' : '';
+                const formatStr = currency === 'THB' ? '฿' + Math.abs(displayVal).toLocaleString(undefined, {maximumFractionDigits: 0}) : '$' + Math.abs(displayVal).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+                resultDisplay.innerText = `${sign}${formatStr}`;
+                resultDisplay.className = `text-3xl font-bold font-mono drop-shadow-md transition-colors ${profitUSD >= 0 ? 'text-emerald-400' : 'text-rose-500'}`;
+            } else {
+                resultDisplay.innerText = currency === 'THB' ? '฿ 0' : '$ 0.00';
+                resultDisplay.className = "text-3xl font-bold text-slate-500 font-mono drop-shadow-md transition-colors";
+            }
+        }
+
+        document.getElementById('roi-coin').addEventListener('change', updateROI);
+        document.getElementById('roi-amount').addEventListener('input', updateROI);
+        document.getElementById('roi-buy').addEventListener('input', updateROI);
+
+        fetchFnG();
+        fetchData();
+        setInterval(fetchData, 60000); 
+    </script>
+</body>
+</html>
