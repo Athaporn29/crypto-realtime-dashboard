@@ -26,4 +26,4 @@ This project relies on live data from industry-standard APIs:
 - Lucide Icons
 
 ## 👨‍💻 Developed By
-[อัฎฐาพร ปักกาเวสา] - University Portfolio Project 2026
+[อัฎฐาพร ปักกาเวสา] - Portfolio Project 2026
