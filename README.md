@@ -1,29 +1,24 @@
-# 📈 CryptoTrack Pro - Real-time Market Dashboard
+Crypto Real-time Dashboard 📈
 
-**Live Demo:** [(https://athaporn29.github.io/crypto-realtime-dashboard/)]
+ระบบติดตามราคา วิเคราะห์ตลาดคริปโตเคอร์เรนซี และพอร์ตโฟลิโอแบบ Real-time พัฒนาด้วย JavaScript และการเชื่อมต่อ API ภายนอก
 
-## 📌 About The Project
-CryptoTrack Pro is an advanced cryptocurrency dashboard designed to provide real-time market analytics, portfolio tracking, and market sentiment analysis. The project demonstrates the ability to integrate multiple RESTful APIs, handle asynchronous data fetching, and create a responsive, modern UI using a Glassmorphism design approach.
+🌟 Features
+- Real-Time Market Data: ดึงข้อมูลราคาเหรียญและ % การเปลี่ยนแปลงใน 24 ชั่วโมงแบบสดๆ
+- Interactive Charts: แสดงกราฟเส้นแนวโน้มราคาย้อนหลัง 7 วันของแต่ละเหรียญ
+- ROI Calculator: ระบบคำนวณกำไร/ขาดทุนในพอร์ต พร้อมรองรับการแปลงสกุลเงิน USD และ THB
+- Market Sentiment: แสดงดัชนีความกลัวและความโลภ (Fear & Greed Index)
+- Price Alert: ตั้งค่าแจ้งเตือนผ่านเบราว์เซอร์เมื่อราคา Bitcoin แตะจุดที่กำหนด
 
-## ✨ Key Features
-- **Real-Time Market Data:** Tracks top cryptocurrencies (BTC, ETH, BNB, SOL, ADA, XRP) with live price updates and 24h percentage changes.
-- **Interactive Sparkline Charts:** Visualizes 7-day price trends using Chart.js.
-- **Dynamic ROI Calculator:** Allows users to estimate profit/loss based on custom buy prices and holdings.
-- **Multi-Currency Support:** Seamlessly toggles between USD ($) and THB (฿) with real-time conversion.
-- **Market Sentiment & Stats:** Integrates the Fear & Greed Index and automatically calculates Top Gainers and Losers over 24 hours.
-- **Price Alerts:** Features a browser notification system to alert users when Bitcoin hits a target price.
+🛠️ Tech Stack
+- Frontend: HTML5, CSS3 (Tailwind CSS)
+- Logic & Data: Vanilla JavaScript (ES6+), Fetch API
+- External APIs: CoinGecko API, Alternative.me API
+- Libraries: Chart.js (สร้างกราฟ), Lucide (ไอคอน)
 
-## 🔗 API Integration
-This project relies on live data from industry-standard APIs:
-- **CoinGecko API:** Fetches live coin prices, market cap, 24h changes, and 7-day sparkline data.
-- **Alternative.me API:** Retrieves the current Crypto Fear & Greed Index.
+🚀 How to Install
+- Clone repository นี้ลงในเครื่องของคุณ
+- ดับเบิลคลิกเปิดไฟล์ `index.html` บน Web Browser (เช่น Chrome, Edge, Safari) เพื่อใช้งานได้ทันที (ไม่ต้องติดตั้ง Local Server)
+- *หรือเข้าใช้งานผ่าน GitHub Pages ได้โดยตรงที่:* [ใส่ลิงก์ GitHub Pages ของนายตรงนี้]
 
-## 🛠️ Built With
-- HTML5 / CSS3
-- Tailwind CSS
-- Vanilla JavaScript (ES6+)
-- Chart.js (Data Visualization)
-- Lucide Icons
-
-## 👨‍💻 Developed By
-[อัฎฐาพร ปักกาเวสา] - Portfolio Project 2026
+📁 Project Structure
+- index.html: ไฟล์หลักที่รวมโครงสร้าง UI, การตกแต่งสไตล์ด้วย Tailwind และ Logic JavaScript ไว้ในไฟล์เดียวเพื่อความรวดเร็วในการแสดงผล
