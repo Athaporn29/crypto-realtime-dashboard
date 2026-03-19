@@ -18,7 +18,7 @@ Crypto Real-time Dashboard 📈
 🚀 How to Install
 - Clone repository นี้ลงในเครื่องของคุณ
 - ดับเบิลคลิกเปิดไฟล์ `index.html` บน Web Browser (เช่น Chrome, Edge, Safari) เพื่อใช้งานได้ทันที (ไม่ต้องติดตั้ง Local Server)
-- *หรือเข้าใช้งานผ่าน GitHub Pages ได้โดยตรงที่:* [ใส่ลิงก์ GitHub Pages ของนายตรงนี้]
+- *หรือเข้าใช้งานผ่าน GitHub Pages ได้โดยตรงที่:* [https://athaporn29.github.io/crypto-realtime-dashboard/]
 
 📁 Project Structure
 - index.html: ไฟล์หลักที่รวมโครงสร้าง UI, การตกแต่งสไตล์ด้วย Tailwind และ Logic JavaScript ไว้ในไฟล์เดียวเพื่อความรวดเร็วในการแสดงผล
